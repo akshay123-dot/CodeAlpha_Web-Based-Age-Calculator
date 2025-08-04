@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Age Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background:linear-gradient(to right, orange,yellow,gold);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .calculator {
+      background:linear-gradient(to left, yellow,green,orange,rgb(118, 91, 91),rgb(184, 56, 56),gold,aqua);
+      backdrop-filter: blur(10px);
+      
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    input[type="date"] {
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .output {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      background: #ffffff20;
+      padding: 15px;
+      border-radius: 10px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #ffeb3b;
+    }
+
+    @media (max-width: 600px) {
+      .calculator {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator">
+    <h1>🎂 Interactive Age Calculator</h1>
+    <label for="dob">Select your date of birth:</label><br>
+    <input type="date" id="dob">
+    <div class="output" id="output">Your age will appear here...</div>
+  </div>
+
+  <script>
+    const dobInput = document.getElementById('dob');
+    const output = document.getElementById('output');
+
+    dobInput.addEventListener('input', () => {
+      const dob = new Date(dobInput.value);
+      const now = new Date();
+
+      if (!dobInput.value || dob > now) {
+        output.innerHTML = `<span style="color: #ff5252;">Please enter a valid past date.</span>`;
+        return;
+      }
+
+      const ageDetails = calculateAge(dob, now);
+      const nextBirthday = calculateNextBirthday(dob, now);
+
+      output.innerHTML = `
+        You are <span class="highlight">${ageDetails.years}</span> years,
+        <span class="highlight">${ageDetails.months}</span> months,
+        and <span class="highlight">${ageDetails.days}</span> days old.<br><br>
+        🗓️ Your next birthday is in <span class="highlight">${nextBirthday.daysLeft}</span> days on 
+        <span class="highlight">${nextBirthday.dateStr}</span>.
+      `;
+    });
+
+    function calculateAge(dob, today) {
+      let years = today.getFullYear() - dob.getFullYear();
+      let months = today.getMonth() - dob.getMonth();
+      let days = today.getDate() - dob.getDate();
+
+      if (days < 0) {
+        months--;
+        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += lastMonth.getDate();
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      return { years, months, days };
+    }
+
+    function calculateNextBirthday(dob, today) {
+      let next = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+
+      // If birthday this year already passed, move to next year
+      if (next < today) {
+        next.setFullYear(next.getFullYear() + 1);
+      }
+
+      const diffTime = next - today;
+      const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const dateStr = next.toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      return { dateStr, daysLeft };
+    }
+  </script>
+
+</body>
+</html>
